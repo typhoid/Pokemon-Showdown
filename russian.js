@@ -1,13 +1,9 @@
-/*********************************************************
- beta of Typhoid's ULTIMATE RUSSIAN ROULETTE
- 
- known bugs: in standard mode, bullet is in second chamber far too often.
- known bugs: sometimes winner is undefined
- features unfinished :spectator gambling
- features unfinished: the atmosphere
- 
- *********************************************************/
-
+/* Typhoid's ultimate russian roulette! 
+version 0.90 (1.0 will be final)
+things to do:user decided bullet amount, revolver size opposed to presets.
+gambling tweaks.
+maybe game mechanic tweaks
+*/
 /*********************************************************
  * Functions
  *********************************************************/
@@ -76,7 +72,9 @@ exports.russian = function(ru) {
                 newrevolver: false,
 				costbunnies: true,
 		        costbits: false,
-				moneypool: 0
+				moneypool: 0,
+				gambleloser: new Array(),
+				gamblewinner: new Array()
 			};
 		},
 		shuffle: function(list) {
@@ -130,7 +128,7 @@ exports.russian = function(ru) {
 		},
 		remsg: function(apparent, nonhtml) {
 			if (!isFinite(apparent)) return '';
-			if (apparent === 0) return ' The first round of the russiannament starts now.';
+			if (apparent === 0) return ' The first round of the russian roulette starts now.';
 			if (nonhtml) return (' ' + apparent + ' slot' + ( apparent === 1 ? '' : 's') + ' remaining.' );
 			return (' <b><i>' + apparent + ' slot' + ( apparent === 1 ? '' : 's') + ' remaining.</b></i>' );
 		},
@@ -141,7 +139,7 @@ exports.russian = function(ru) {
 				if (connection) connection.sendTo(room, 'There is nothing to report.');
 			} else if (trid.players.length == trid.playerslogged.length + 1) {
 				var someid = trid.players[trid.playerslogged.length];
-				room.addRaw('<b>' + russian.username(someid) + '</b> has joined the russiannament.' + russian.remsg(remslots));
+				room.addRaw('<b>' + russian.username(someid) + '</b> had a bag placed over their head and dragged off into the shadows!' + russian.remsg(remslots));
 				trid.playerslogged.push(trid.players[trid.playerslogged.length]);
 			} else {
 				var someid = trid.players[trid.playerslogged.length];
@@ -152,7 +150,7 @@ exports.russian = function(ru) {
 				}
 				someid = trid.players[trid.players.length - 1];
 				var listnames = prelistnames + ' and <b>' + russian.username(someid) + '</b>';
-				room.addRaw(listnames + ' have joined the russiannament.' + russian.remsg(remslots));
+				room.addRaw(listnames + ' have joined the russian roulette.' + russian.remsg(remslots));
 
 				trid.playerslogged.push(trid.players[trid.playerslogged.length]);
 				for (var i = trid.playerslogged.length; i < trid.players.length - 1; i++) { //the length is disturbed by the push above
@@ -312,10 +310,9 @@ exports.russian = function(ru) {
 		},
 		
 		gamblebits: function(uid, rid, russianfunny, take) {
-		console.log(uid);
-		console.log(russianfunny);
-		console.log(take);
 
+ console.log(uid);
+ console.log(uid.userid)
 						var data = fs.readFileSync('config/money.csv','utf8')
 				var match = false;
 				var money = 0;
@@ -360,6 +357,7 @@ exports.russian = function(ru) {
 				},
 				
 	    gamblecoins: function(uid, rid, russianfunny, take) {
+
 	    var lore = fs.readFileSync('config/coins.csv','utf8')
                 var match = false;
                 var coins = 0;
@@ -382,9 +380,9 @@ exports.russian = function(ru) {
                 uid.coins = coins;
 						if (take === true){if (russianfunny <= uid.coins){
 				uid.coins = uid.coins - russianfunny; take = false;}
-				else return 1;
+				else return false;
 				}
-                uid.coins = uid.coins + russianbunny;
+				else {uid.coins = uid.coins + russianfunny;}
 				
                 if (match === true) {
                     var be = new RegExp(hetti,"g");
@@ -402,15 +400,142 @@ exports.russian = function(ru) {
                     log.write("\n"+uid.userid+','+uid.coins);
                 } return true;
 		},
+		 testcoins: function() {
+		 
+		 payoutnigga = false;
+					if (gambleloser[0]){	
+					
+					if (gambleloser[0][0] == firstloser){payoutnigga = true;}
+					hipe = gambleloser[0][1];
+							console.log(hipe);
+							console.log(Users.users[hipe].userid)
+							yuppie = gambleloser[0][3];
+							russianfunny = gambleloser[0][2] + gambleloser[0][2];
+							console.log(russianfunny);
+											gambleloser.splice(0,1);
+							}
+							else if (gamblewinner[0]){
+											if (gamblewinner[0][0] == winned[0]) {payoutnigga = true;}
+							
+							hipe = gamblewinner[0][1];
+							yuppie = gamblewinner[0][3];
+							console.log('yehehe');
+							russianfunny = gamblewinner[0][2] + gamblewinner[0][2];
+							gamblewinner.splice(0,1);
+							
+							}
+							
+					if (payoutnigga == true){	
+if (yuppie == 'bunnies'){					
+							
+ var lore = fs.readFileSync('config/coins.csv','utf8')
+                var match = false;
+                var coins = 0;
+                var spag = (''+lore).split("\n");
+                var hetti = '';
+                for (var i = spag.length; i > -1; i--) {
+                    if (!spag[i]) continue;
+                    var parts = spag[i].split(",");
+                    var userid = toUserid(parts[0]);
+					if (Users.users[hipe].userid == userid) {
+                        var x = Number(parts[1]);
+                        var coins = x;
+                        match = true;
+                        if (match === true) {
+                            hetti = hetti + spag[i];
+                            break;
+                        }
+                    }
+                }
+                Users.users[hipe].coins = coins;
+						
+				Users.users[hipe].coins = Users.users[hipe].coins + russianfunny;
+				
+                if (match === true) {
+                    var be = new RegExp(hetti,"g");
+                    fs.readFile('config/coins.csv', 'utf8', function (err,lore) {
+                        if (err) {
+                            return console.log(err);
+                        }
+                        var result = lore.replace(be, Users.users[hipe].userid+','+Users.users[hipe].coins);
+                        fs.writeFile('config/coins.csv', result, 'utf8', function (err) {
+                            if (err) return console.log(err);
+                        });
+                    });
+                } else {
+                    var log = fs.createWriteStream('config/coins.csv', {'flags': 'a'});
+                    log.write("\n"+Users.users[hipe].userid+','+Users.users[hipe].coins);
+                } 
+				}
+				if (yuppie == 'bits') {
+				
+										var data = fs.readFileSync('config/money.csv','utf8')
+				var match = false;
+				var money = 0;
+				var row = (''+data).split("\n");
+				var line = '';
+				for (var i = row.length; i > -1; i--) {
+					if (!row[i]) continue;
+					var parts = row[i].split(",");
+					var userid = toUserid(parts[0]);
+					if (Users.users[hipe].userid == userid) {
+						var x = Number(parts[1]);
+						var money = x;
+						match = true;
+						if (match === true) {
+							line = line + row[i];
+							break;
+						}
+					}
+				}
+				Users.users[hipe].money = money;
+
+			  Users.users[hipe].money = Users.users[hipe].money + russianfunny;
+			  
+				if (match === true) {
+					var re = new RegExp(line,"g");
+					fs.readFile('config/money.csv', 'utf8', function (err,data) {
+					if (err) {
+						return console.log(err);
+					}
+					var result = data.replace(re, Users.users[hipe].userid+','+Users.users[hipe].money);
+					fs.writeFile('config/money.csv', result, 'utf8', function (err) {
+						if (err) return console.log(err);
+					});
+					});
+				} else {
+					var log = fs.createWriteStream('config/money.csv', {'flags': 'a'});
+					log.write("\n"+Users.users[hipe].userid+','+Users.users[hipe].money);
+				}
+				
+				
+				
+				
+				
+				}
+				
+				
+				
+				
+				
+				}
+				if (gamblewinner[0] || gambleloser[0]){
+		setTimeout(function() {   russian.testcoins();	}, 50);
+ }
+		},
+		
 		start: function(rid) {
-		if (config.russiansmith == true) {russian[rid].revolver = new Array("bullet","blank","blank","blank","blank","blank");} //Smith & Wesson model 3- 6 shot
-		else if (config.russiannagant == true) {russian[rid].revolver = new Array("bullet","blank","blank","blank","blank","blank","blank");}    //Model 1895 Nagant 7 shot 
-		else if (config.russianwebley == true) {russian[rid].revolver = new Array("bullet","blank","blank","blank","blank","blank","blank","blank");}//Webley-Fosbery Self-Cocking Automatic .38 Revolver  8 shot
-	    else if (config.russianlemat == true) {russian[rid].revolver = new Array("bullet","blank","blank","blank","blank","blank","blank","blank","blank");}//LeMat Pinfire Revolver 9 shot,1 shotgun 
-          else {russian[rid].revolver = new Array("bullet","blank","blank","blank","blank");}
-		  if (config.russian1917 == true){
+		bulletz = '1 bullet';
+		if (config.russiansmith == true) {russian[rid].revolver = new Array("bullet","blank","blank","blank","blank","blank"); gun = 'Smith & Wesson';} //Smith & Wesson model 3- 6 shot
+		else if (config.russiannagant == true) {russian[rid].revolver = new Array("bullet","blank","blank","blank","blank","blank","blank"); gun = '1895 Nagant';}    //Model 1895 Nagant 7 shot 
+		else if (config.russianwebley == true) {russian[rid].revolver = new Array("bullet","blank","blank","blank","blank","blank","blank","blank"); gun = 'Webley-Fosbery';}//Webley-Fosbery Self-Cocking Automatic .38 Revolver  8 shot
+	    else if (config.russianlemat == true) {russian[rid].revolver = new Array("bullet","blank","blank","blank","blank","blank","blank","blank","blank"); gun = 'Lemat Pinfire Revolver';}//LeMat Pinfire Revolver 9 shot,1 shotgun 
+          else {russian[rid].revolver = new Array("bullet","blank","blank","blank","blank"); gun = 'Charter 38 Special';} //  5 shot
+		  if (config.russian1917 == true){ bub = (rusian[rid].revolver.length - 1); bulletz = bub + 'bullets';
 		 r1917 = russian[rid].revolver;
     for (var i in r1917){r1917.splice(i,1,"bullet"); } r1917.splice(0,1,"blank"); russian[rid].revolver = r1917;}
+		if (!config.russianstandard & !config.russianspin & !config.russianmultispin) {config.russianstandard = true;}
+
 	
 			var spin = russian[rid].revolver;
 			russian.shuffle(spin);
@@ -452,11 +577,97 @@ exports.russian = function(ru) {
 			russian.startRaw(rid);
 		},
 		startRaw: function(i) {
-			
+		var room = Rooms.rooms[i];
+					var round = russian[room.id].round;
+								var html = 'here we goooooooooo';
 
-			var room = Rooms.rooms[i];
+			for (var i in round) {
+			
+						var p1n = russian.username(round[i][0]);
+						if (p1n.substr(0, 6) === 'Guest ') p1n = round[i][0];
+						html += "<font color=\"red\">" + clean(p1n) + "</font><br />";
+				}
+		html +='<font color=\"red\">had the bags taken off of their heads to be made aware of the situation at hand!They would find themselves seated at a round table in a dark damp room with a pull switch light dangling over the table as the only noticeable furnishing.Groups of intimidating looking mudkips swarmed around them, making wagers on the dangerous situation that was about to unfold.</font><br />';
+		html +='<font color=\"red\">The  possibly-ex-KGB Mudkips were tough looking, covered in tattoos, and were of monsterous build and size. One of the mudkips approached the table and pulled out a '+ gun +' and put'+ bulletz +' into the cylinder!As he put it on the center of the table, all the players looked at eachother and you could feel the tension quickly rise.</font><br />';
+		   room.addRaw(html);
+		if (config.russiangamble == true) {
+	  setTimeout(function() { 	voteloser = true;
+			var separacion = "&nbsp;&nbsp;";
+		var answers = russian[room.id].players;
+		var question = ' "YOU HAVE *60* SECONDS!!! who will die first?"/gamble PLAYERNAME, AMOUNT ';
+		var answers = answers.join(',').toLowerCase().split(',');
+		russian[room.id].question = question;
+		russian[room.id].answerList = answers;
+		room.addRaw('<div class="infobox"><h2>' + russian[room.id].question + separacion + '<font size=2 color = "#939393"><small>/gamble OPTION, AMOUNT<br /><i></font size></i></small></font></h2><hr />' + separacion + separacion + " &bull; " + russian[room.id].answerList.join(' &bull; ') + '</div>');
+   	
+	}, 12000);
+
+   setTimeout(function() { 		 	var votes = Object.keys(russian[room.id].answers).length;
+		if (votes == 0) {
+			russian[room.id].question = undefined;
+			russian[room.id].answerList = new Array();
+			russian[room.id].answers = new Object();
+			room.addRaw("<h3>The poll was cancelled because of lack of voters.</h3>");			
+		}
+		var options = new Object();
+		var obj = russian[room.id];
+		for (var i in obj.answerList) options[obj.answerList[i]] = 0;
+		for (var i in obj.answers) options[obj.answers[i]]++;
+		var sortable = new Array();
+		for (var i in options) sortable.push([i, options[i]]);
+		sortable.sort(function(a, b) {return a[1] - b[1]});
+		var html = "";
+		for (var i = sortable.length - 1; i > -1; i--) {
+			console.log(i);
+			var option = sortable[i][0];
+			var value = sortable[i][1];
+			html += "&bull; " + option + " - " + Math.floor(value / votes * 100) + "% (" + value + ")<br />";
+		}
+		room.addRaw('<div class="infobox"><h2>Results to "' + obj.question + '"<br /><i><font size=1 color = "#939393"></font></i></h2><hr />' + html + '</div>');		russian[room.id].question = undefined;
+		russian[room.id].answerList = new Array();
+		russian[room.id].answers = new Object();
+ 
+	voteloser = false;
+                             votewinner = true;    
+					var separacion = "&nbsp;&nbsp;";
+		var answers = russian[room.id].players;
+		var question = ' "YOU HAVE *60* SECONDS!!! who will survive?"/gamble PLAYERNAME, AMOUNT ';
+		var answers = answers.join(',').toLowerCase().split(',');
+		russian[room.id].question = question;
+		russian[room.id].answerList = answers;
+		room.addRaw('<div class="infobox"><h2>' + russian[room.id].question + separacion + '<font size=2 color = "#939393"><small>/gamble OPTION, AMOUNT<br /><i></font size></i></small></font></h2><hr />' + separacion + separacion + " &bull; " + russian[room.id].answerList.join(' &bull; ') + '</div>');
+
+		
+		}, 75000);
+setTimeout(function() {var votes = Object.keys(russian[room.id].answers).length;
+		if (votes == 0) {
+			russian[room.id].question = undefined;
+			russian[room.id].answerList = new Array();
+			russian[room.id].answers = new Object();
+			room.addRaw("<h3>The poll was cancelled because of lack of voters.</h3>");			
+		}
+		var options = new Object();
+		var obj = russian[room.id];
+		for (var i in obj.answerList) options[obj.answerList[i]] = 0;
+		for (var i in obj.answers) options[obj.answers[i]]++;
+		var sortable = new Array();
+		for (var i in options) sortable.push([i, options[i]]);
+		sortable.sort(function(a, b) {return a[1] - b[1]});
+		var html = "";
+		for (var i = sortable.length - 1; i > -1; i--) {
+			console.log(i);
+			var option = sortable[i][0];
+			var value = sortable[i][1];
+			html += "&bull; " + option + " - " + Math.floor(value / votes * 100) + "% (" + value + ")<br />";
+		}
+		room.addRaw('<div class="infobox"><h2>Results to "' + obj.question + '"<br /><i><font size=1 color = "#939393"></font></i></h2><hr />' + html + '</div>');		russian[room.id].question = undefined;
+		russian[room.id].answerList = new Array();
+		russian[room.id].answers = new Object();
+
+ voteloser = false;
+ votewinner = false;
+
 			var html = '<hr /><h3><font color="green">Round '+ russian[room.id].roundNum +'!</font></h3><font color="blue"><b>TURN:' + russian[room.id].turnNum + '</b></font><font color="red"><b>MONEYPOOL:'+russian[room.id].moneypool + '</b></font><hr /><center>';
-			var round = russian[room.id].round;
 			var firstMatch = false;
 			for (var i in round) {
 				if (!round[i][1]) {
@@ -474,6 +685,35 @@ exports.russian = function(ru) {
 				}
 			}
 			room.addRaw(html + "</table>");
+			}, 140000);
+			
+			}
+			else {  
+			 voteloser = false;
+ votewinner = false;
+ 
+ 	var html = '<hr /><h3><font color="green">Round '+ russian[room.id].roundNum +'!</font></h3><font color="blue"><b>TURN:' + russian[room.id].turnNum + '</b></font><font color="red"><b>MONEYPOOL:'+russian[room.id].moneypool + '</b></font><hr /><center>';
+			var firstMatch = false;
+			for (var i in round) {
+				if (!round[i][1]) {
+						var p1n = russian.username(round[i][0]);
+						if (p1n.substr(0, 6) === 'Guest ') p1n = round[i][0];
+						html += "<font color=\"red\">" + clean(p1n) + " hasnt gone yet!</font><br />";
+				}
+				else {
+					var p1n = russian.username(round[i][0]);
+					var p2n = russian.username(round[i][1]);
+					var p3n = russian.username(round[i][2]);
+					if (p1n.substr(0, 6) === 'Guest ') p1n = round[i][0];
+					var tabla = ""; if (!firstMatch) {var tabla = "</center><table align=center cellpadding=0 cellspacing=0>";firstMatch = true;}
+					html += tabla + "<tr><td align=right>" + clean(p1n) + "</td></tr>";
+				}
+			}
+			room.addRaw(html + "</table>");
+ 
+			
+			}
+			
 		},
 		nextRound: function(rid) {
 		    var v = russian[rid].survivors;
@@ -486,10 +726,13 @@ exports.russian = function(ru) {
 			russian[rid].round = new Array();
 			russian[rid].winners = new Array();
 			russian[rid].byes = new Array();
-			
+							Rooms.rooms[rid].addRaw(w[0]);
+				Rooms.rooms[rid].addRaw(w);
 			
 			var firstMatch = false;
 			 if ((russian[rid].players.length - check) == l.length ) {
+			 if (w[0] == undefined || !w[0] || w[0] == "undefined") {  if (typeof w[0] == "undefined") {w.splice(0,1)} w.push(v[0]);
+			 console.log(w[0]);}
 				var russianMoney = 0;
 				var tooSmall = '';
 				var p = 'bits';
@@ -512,92 +755,65 @@ exports.russian = function(ru) {
 					if (russian[rid].size < 4) {
 						russianMoney = 0;
 						russianbunny = 0;
-						if (russian[rid].costbunnies == false || russian[rid].costbits == false ) {tooSmall = tooSmall + '(the russian was too small)';
+						if (russian[rid].costbunnies == false & russian[rid].costbits == false ) {tooSmall = tooSmall + '(the russian was too small)';
 					}}
               if (russian[rid].costbunnies == true){
                     russianbunny = russian[rid].moneypool;
-                russianMoney = 0;			p = 'dust bunnies';		}
+                			p = 'dust bunnies';		}
              if (russian[rid].costbits == true){ russianMoney = russian[rid].moneypool;
-			 russianbunny = 0;}					
+			 }					
 				}  
 			else	{
 					tooSmall += '(this is not an official chatroom)';
 				}
+				Rooms.rooms[rid].addRaw(w[0]);
+				Rooms.rooms[rid].addRaw(w);
 				//end russian
-Rooms.rooms[rid].addRaw('<h2><font color="green">Congratulations <font color="black">' + Users.users[w[0]].name + '</font>!  Youre the last standing!<br>You have also won ' + russianMoney + ' poketariat ' + p + '! ' + tooSmall + '</font></h2><hr />');
-				//fffffffffff
-				var data = fs.readFileSync('config/money.csv','utf8')
-				var match = false;
-				var money = 0;
-				var row = (''+data).split("\n");
-				var line = '';
-				for (var i = row.length; i > -1; i--) {
-					if (!row[i]) continue;
-					var parts = row[i].split(",");
-					var userid = toUserid(parts[0]);
-					if (Users.users[w[0]].userid == userid) {
-						var x = Number(parts[1]);
-						var money = x;
-						match = true;
-						if (match === true) {
-							line = line + row[i];
-							break;
-						}
-					}
+gambleloser = russian[rid].gambleloser;
+gamblewinner = russian[rid].gamblewinner;
+winned = w;
+		var room = Rooms.rooms[i];
+				var html = '<h2><font color="green">Congratulations <font color="black">' + Users.users[w[0]].name + '</font>!  Youre the last standing!<br>You have also won ' + russian[rid].moneypool + ' poketariat ' + p + '! ' + tooSmall + '</font></h2><hr />';
+	
+			if (config.russiangamble == true) {
+
+	
+							for (var i in gambleloser) {
+				if (gambleloser[i][0] == firstloser) {
+	
+						html += "<font color=\"red\">" + gambleloser[i][1] + " won the bet and doubled their money!!</font><br />";
+				}}			
+				
+				for (var i in gamblewinner) {
+				if (gamblewinner[i][0] == w[0]) {
+		
+				
+						html += "<font color=\"red\">" + gamblewinner[i][1] + " won the bet and doubled their money!!</font><br />" ;
+				}} 
+				
+				
 				}
-				Users.users[w[0]].money = money;
-				Users.users[w[0]].money = Users.users[w[0]].money + russianMoney;
-				if (match === true) {
-					var re = new RegExp(line,"g");
-					fs.readFile('config/money.csv', 'utf8', function (err,data) {
-					if (err) {
-						return console.log(err);
-					}
-					var result = data.replace(re, Users.users[w[0]].userid+','+Users.users[w[0]].money);
-					fs.writeFile('config/money.csv', result, 'utf8', function (err) {
-						if (err) return console.log(err);
-					});
-					});
-				} else {
-					var log = fs.createWriteStream('config/money.csv', {'flags': 'a'});
-					log.write("\n"+Users.users[w[0]].userid+','+Users.users[w[0]].money);
-				}
-			    var lore = fs.readFileSync('config/coins.csv','utf8')
-                var match = false;
-                var coins = 0;
-                var spag = (''+lore).split("\n");
-                var hetti = '';
-                for (var i = spag.length; i > -1; i--) {
-                    if (!spag[i]) continue;
-                    var parts = spag[i].split(",");
-                    var userid = toUserid(parts[0]);
-                    if (Users.users[w[0]].userid == userid) {
-                        var x = Number(parts[1]);
-                        var coins = x;
-                        match = true;
-                        if (match === true) {
-                            hetti = hetti + spag[i];
-                            break;
-                        }
-                    }
-                }
-                Users.users[w[0]].coins = coins;
-                Users.users[w[0]].coins = Users.users[w[0]].coins + russianbunny;
-                if (match === true) {
-                    var be = new RegExp(hetti,"g");
-                    fs.readFile('config/coins.csv', 'utf8', function (err,lore) {
-                        if (err) {
-                            return console.log(err);
-                        }
-                        var result = lore.replace(be, Users.users[w[0]].userid+','+Users.users[w[0]].coins);
-                        fs.writeFile('config/coins.csv', result, 'utf8', function (err) {
-                            if (err) return console.log(err);
-                        });
-                    });
-                } else {
-                    var log = fs.createWriteStream('config/coins.csv', {'flags': 'a'});
-                    log.write("\n"+Users.users[w[0]].userid+','+Users.users[w[0]].coins);
-                }
+Rooms.rooms[rid].addRaw(html);
+//hipe = gambleloser[0][1];
+//russianfunny = gambleloser[0][2] + gambleloser[0][2];
+ //russian.gamblecoins(hipe, room, russianfunny);
+
+hipe = Users.users[w[0]];
+russianfunny = russianMoney;
+ russian.gamblebits(hipe, room, russianfunny);
+			//fffffffffff
+russianfunny = russianbunny;
+russian.gamblecoins(hipe, room, russianfunny);
+
+
+		if (config.russiangamble == true) {
+
+setTimeout(function() {
+
+russian.testcoins();
+				}, 50);
+}
+				
 				russian[rid].status = 0;
 			} 
 			else if (!b.length)
@@ -715,7 +931,12 @@ Rooms.rooms[rid].addRaw('<h2><font color="green">Congratulations <font color="bl
 		},
 	};
 
-
+for (var i in russianStuff) russian[i] = russianStuff[i];
+	for (var i in Tools.data.Formats) {
+			if (Tools.data.Formats[i].effectType == 'Format' && Tools.data.Formats[i].challengeShow) {
+				russian.tiers.push(i);
+			}
+	}
 	if (typeof russian.timers == "undefined") russian.timers = new Object();
 	if (typeof russian.currentSeconds == "undefined") {
 		russian.currentSeconds = 0;
@@ -745,16 +966,18 @@ function clean(string) {
 /*********************************************************
  * Commands
  *********************************************************/
+
 var cmds = {
 	
 
 	//russian commands
 	russian: function(target, room, user, connection) {
-	
+	starter = user;
+	diq = connection;
 		if (target == "update" && this.can('hotpatch')) {
 			CommandParser.uncacheTree('./russian.js');
 			russian = require('./russian.js').russian(russian);
-			return this.sendReply('russiannament scripts were updated.');
+			return this.sendReply('russian roulete scripts were updated.');
 		}
 		if (!russian.midauth(user,room)) return this.parse('/russians');
 		if (room.decision) return this.sendReply('Prof. Oak: There is a time and place for everything! You cannot do this in battle rooms.');
@@ -824,7 +1047,7 @@ if (targets.length == 1){
 
 		 typemoney = 'free'
 }
-		this.parse('/endpoll');
+		this.parse('/endrpoll');
 		russian.reset(rid);
 if (targets.length == 1){  		 russian[rid].gambleamount = 0;  		russian[rid].size = targets[0]; russian[rid].costbunnies = false; russian[rid].costbits = false; joinable = true; }
 if (targets.length == 2){ 		joinable = false; russian[rid].size = targets[1];   		 russian[rid].gambleamount = targets[0];  
@@ -834,7 +1057,8 @@ bunbunz = false; bitbitz = false;
 		russian[rid].status = 1;
 		russian[rid].players = new Array();
         console.log(targets);
-		Rooms.rooms[rid].addRaw('<hr /><h2><font color="green">' + sanitize(user.name) + ' has started a  russian roulette game.</font> <font color="red">/j</font> <font color="green">to join!</font></h2><b><font color="blueviolet">PLAYERS:</font></b> ' + russian[rid].size + '<br /><font color="blue"><b>ENTRY FEE:</b></font> ' + (russian[rid].gambleamount == 0 ? '' : russian[rid].gambleamount) +  ' ' + typemoney + '  <hr />');
+		firstdied = false;
+		Rooms.rooms[rid].addRaw('<hr /><h2><font color="green">' + sanitize(user.name) + ' has started a Typhoids ULTIMATE Russian Roulette™ game.</font> <font color="red">/joinrussian</font> <font color="green">to join!</font></h2><b><font color="blueviolet">PLAYERS:</font></b> ' + russian[rid].size + '<br /><font color="blue"><b>ENTRY FEE:</b></font> ' + (russian[rid].gambleamount == 0 ? '' : russian[rid].gambleamount) +  ' ' + typemoney + '  <hr />');
 		if (russian.timers[rid]) Rooms.rooms[rid].addRaw('<i>The russian roulette will begin in ' + russian.timers[rid].time + ' minute' + (russian.timers[rid].time == 1 ? '' : 's') + '.<i>');
 	},
 
@@ -856,7 +1080,7 @@ bunbunz = false; bitbitz = false;
 		if (!target) return this.sendReply('Proper syntax for this command: /russiansize size');
 		target = parseInt(target);
 		if (isNaN(target)) return this.sendReply('Proper syntax for this command: /russian size');
-		if (target < 2) return this.sendReply('A russiannament must have at least 3 people in it.');
+		if (target < 2) return this.sendReply('A russian roulette must have at least 2 people in it.');
 		if (target < russian[room.id].players.length) return this.sendReply('Target size must be greater than or equal to the amount of players in the russiannament.');
 		russian[room.id].size = target;
 		russian.reportdue(room);
@@ -895,13 +1119,11 @@ bunbunz = false; bitbitz = false;
 		var hipe = user
 		take = true;
 		console.log(joinable);
-		           bunbunz = false;
-		   bitbitz = true;
-		if ( bunbunz == true) {
-				var joinable = russian.gamblebunnies(hipe, room, russianfunny, take)
+		if ( russian[room.id].costbunnies == true) {
+				var joinable = russian.gamblecoins(hipe, room, russianfunny, take)
            }
 		
-		if (bitbitz == true){
+		if (russian[room.id].costbits == true){
 	 var joinable = russian.gamblebits(hipe, room, russianfunny, take)
 	}
 	if (joinable == true ){
@@ -939,8 +1161,7 @@ bunbunz = false; bitbitz = false;
 		}
 	},
 
-	forcejoin: 'fj',
-	fj: function(target, room, user, connection) {
+	forcejoinrussian: function(target, room, user, connection) {
 		if (!russian.lowauth(user,room)) return this.sendReply('You do not have enough authority to use this command.');
 		if (room.decision) return this.sendReply('Prof. Oak: There is a time and place for everything! You cannot do this in battle rooms.');
 		if (russian[room.id] == undefined || russian[room.id].status == 0 || russian[room.id].status == 2) return this.sendReply('There is no russiannament in a sign-up phase.');
@@ -956,13 +1177,12 @@ bunbunz = false; bitbitz = false;
 		var hipe = targetUser
 		take = true;
 		console.log(joinable);
-		           bunbunz = false;
-		   bitbitz = true;
-		if ( bunbunz == true) {
-				var joinable = russian.gamblebunnies(hipe, room, russianfunny, take)
+
+		if ( russian[room.id].costbunnies == true) {
+				var joinable = russian.gamblecoins(hipe, room, russianfunny, take)
            }
 		
-		if (bitbitz == true){
+		if (russian[room.id].costbits == true){
 	 var joinable = russian.gamblebits(hipe, room, russianfunny, take)
 	}	if (joinable == true ){
 
@@ -973,7 +1193,7 @@ bunbunz = false; bitbitz = false;
 			        targetUser.canttarget = false;
 					targetUser.spin = 0;
 							russian[room.id].moneypool += russian[room.id].gambleamount;
-					room.addRaw(user.name + ' has forced <b>' + russian.username(target) + '</b> to join the russian roulette.' + russian.remsg(remslots));
+					room.addRaw(user.name + ' has forced a bag over <b>' + russian.username(target) + '</b>a head and they were dragged off into the shadows!' + russian.remsg(remslots));
 			if (russian[room.id].size == russian[room.id].players.length) russian.start(room.id);
 					}
 						else { return this.sendReply('the user' + targetUser +' does not have enough money to join. it costs' + russian[room.id].gambleamount + ' to join');
@@ -987,14 +1207,14 @@ bunbunz = false; bitbitz = false;
 
 
 
-	remind: function(target, room, user, connection) {
+	russianremind: function(target, room, user, connection) {
 		if (!russian.lowauth(user,room)) return this.sendReply('You do not have enough authority to use this command.');
 		if (room.decision) return this.sendReply('Prof. Oak: There is a time and place for everything! You cannot do this in battle rooms.');
-		if (russian[room.id] == undefined || !russian[room.id].status) return this.sendReply('There is no active russiannament in this room.');
+		if (russian[room.id] == undefined || !russian[room.id].status) return this.sendReply('There is no active russian roulette in this room.');
 		if (russian[room.id].status == 1) {
 			var remslots = russian[room.id].size - russian[room.id].players.length;
 			russian.reportdue(room, connection);
-			room.addRaw('<hr /><h2><font color="green">Please sign up for the ' + Tools.data.Formats[russian[room.id].tier].name + ' russiannament.</font> <font color="red">/j</font> <font color="green">to join!</font></h2><b><font color="blueviolet">PLAYERS:</font></b> ' + (isFinite(russian[room.id].size) ? russian[room.id].size : 'UNLIMITED') + '<br /><font color="blue"><b>TIER:</b></font> ' + Tools.data.Formats[russian[room.id].tier].name + '<hr />');
+			room.addRaw('<hr /><h2><font color="green">Please sign up for the  russian roulette.</font> <font color="red">/j</font> <font color="green">to join!</font></h2><b><font color="blueviolet">PLAYERS:</font></b> ' + (isFinite(russian[room.id].size) ? russian[room.id].size : 'UNLIMITED') + '<br /><hr />');
 		} else {
 			var c = russian[room.id];
 			var unfound = [];
@@ -1004,11 +1224,11 @@ bunbunz = false; bitbitz = false;
 						var userOne = Users.get(c.round[x][0]);
 						var userTwo = Users.get(c.round[x][1]);
 						if (userOne) {
-							userOne.popup("Remember that you have a pending russiannament battle in the room ");
+							userOne.popup("Remember that you have a pending russian roulette in the room " + room.title + ". Unless you shoot soon you could be forced.");
 						} else {
 							unfound.push(c.round[x][0]);
 						}
-	
+
 					}
 				}
 			} else {
@@ -1033,18 +1253,74 @@ bunbunz = false; bitbitz = false;
 						}
 					}
 					if (nicetarget) {
-						someuser.popup("Remember that you have a pending russiannament battle in the room ");
+						someuser.popup("Remember that you have a pending russian roulette in the room " + room.title + ". Unless you shoot soon you could be forced.");
 					} else {
 						unfound.push(someuser.name);
 					}
 				}
 			}
 			room.addRaw("Users with pending battles in the russian roulette were reminded of it by " + user.name + '.');
-			if (unfound.length) return this.sendReply("The following users are offline or lack pending battles: " + unfound.toString());
+			if (unfound.length) return this.sendReply("The following users are offline: " + unfound.toString());
 		}
 	},
 
+	viewrussian: 'vrr',
+	vrr: function(target, room, user, connection) {
+		if (!russian[room.id].status) {
+			if (!this.canBroadcast()) return;
+			var oghtml = "<hr /><h2>russian roulettes In Their Signup Phase:</h2>";
+			var html = oghtml;
+			for (var i in russian) {
+				var c = russian[i];
+				if (typeof c == "object") {
+					if (c.status == 1) html += '<button name="joinRoom" value="' + i + '">' + Rooms.rooms[i].title + ' - </button> ';
+				}
+			}
+			if (html == oghtml) html += "There are currently no russian roulettes in their signup phase.";
+			this.sendReply('|raw|' + html + "<hr />");
+		} else if (russian[room.id].status == 1) {
+			if (!russian.lowauth(user,room)) return this.sendReply('You should not use this command during the sign-up phase.');
+			russian.reportdue(room, connection);
+		} else {
+			if (!this.canBroadcast()) return;
+			if (room.decision) return this.sendReply('Prof. Oak: There is a time and place for everything! You cannot do this in battle rooms.');
+			if (russian[room.id] == undefined) return this.sendReply('There is no active russian roulette in this room.');
+			if (russian[room.id].status < 2) return this.sendReply('There is no russiannament out of its signup phase.');
+			var html = '<hr /><h3><font color="green">Round '+ russian[room.id].roundNum + '!</font></h3><font color="blue"><b></b></font> '  + "<hr /><center><small><font color=red>Red</font> = lost, <font color=green>Green</font> = won, <a class='ilink'><b>URL</b></a> = battling</small><center>";
+			var r = russian[room.id].round;
+			var firstMatch = false;
+			for (var i in r) {
+				if (!r[i][1]) {
+					//bye
+					var byer = russian.username(r[i][0]);
+					html += "<font color=\"red\">" + clean(byer) + " hasnt gone.</font><br />";
+				}
+				else {
+					if (r[i][1] == undefined) {
+						//haven'ru started
+						var p1n = russian.username(r[i][0]);
+						var p2n = russian.username(r[i][1]);
+						if (p1n.substr(0, 6) === 'Guest ') p1n = r[i][0];
+						var tabla = "";if (!firstMatch) {var tabla = "</center><table align=center cellpadding=0 cellspacing=0>";firstMatch = true;}
+						html += tabla + "<tr><td align=right>" + clean(p1n) + "</td></tr>";
+					}
 
+					else {
+						//match completed
+						var p1 = "red";
+						if (r[i][2] == r[i][0]) {
+							p1 = "green";
+						}
+						var p1n = russian.username(r[i][0]);
+						if (p1n.substr(0, 6) === 'Guest ') p1n = r[i][0];
+						var tabla = "";if (!firstMatch) {var tabla = "</center><table align=center cellpadding=0 cellspacing=0>";firstMatch = true;}
+						html += tabla + "<tr><td align=right><b><font color=\"" + p1 + "\">" + clean(p1n) + "</font></b></td></tr>";
+					}
+				}
+			}
+			this.sendReply("|raw|" + html + "</table>");
+		}
+	},
 
 
 	forceshoot: function(target, room, user, connection){
@@ -1085,27 +1361,37 @@ bunbunz = false; bitbitz = false;
 
 		   if (spin[0] == "bullet")
 		{var error = russian.lose(dqGuy, room.id);
+		if (!firstdied){
+		firstdied = true;   firstloser = dqGuy;}
+			if (config.russianstandard == true) {russian.shuffle(spin);}
+                         
 
+	room.addRaw('<b>' + russian.username(coolguy) + ' ' + 'took the gun, shouted "COWARD!" and pointed it at ' +' '+ russian.username(dqGuy)+' !!!!</b>');
+setTimeout(function() {	
+				room.addRaw('<b>!!BANG!!he spilled tomato sauce all over' +' '+ russian.username(dqGuy) + 's '+' ' + ' new shirt! spaghetti flew all over the place! eh, was pretty cool guy too...</b>');
 
-	room.addRaw('<b>' + russian.username(coolguy) + ' ' + 'took the gun, shouted "COWARD!" and pointed it at ' +' '+ russian.username(dqGuy)+' ' + 'and spilled tomato sauce all over' +' '+ russian.username(dqGuy) + 's '+' ' + ' new shirt! spaghetti flew all over the place! eh, was pretty cool guy too...</b>');
-						russian[room.id].revolver = spin;
+				russian[room.id].revolver = spin;
 			var r = russian[room.id].round;
 			var c = r.length;
 			if (r.length == c) russian.nextRound(room.id);
-			return this.sendReply('you made' + ''+ russian.username(dqGuy) + '' + 'get tomato sauce all over his shirt! shame on you!:O');
-
+			return 
+			}, 5000);
 			}
 	else {
 	
 			var error = russian.win(dqGuy, room.id);
+		    if (config.russianstandard == true){
+			poe = spin.shift(); spin.push(poe);}
 
-
-			room.addRaw('<b>' + russian.username(coolguy) + ' ' + ' took the gun, shouted "COWARD!" and pointed it at ' +' '+ russian.username(dqGuy)+' ' + ' and pulled the trigger and nothing happened! oh well, maybe next time!' + russian.username(dqGuy) +' ' + 'glared at' + ' ' + russian.username(coolguy) + ' ' + ' for trying to get their air jordans messy!</b>');
+			room.addRaw('<b>' + russian.username(coolguy) + ' ' + ' took the gun, shouted "COWARD!" and pointed it at ' +' '+ russian.username(dqGuy)+' </b>');
+			setTimeout(function() {	
+          room.addRaw('<b>  !!!CLICK!!! nothing happened! oh well, maybe next time!' + russian.username(dqGuy) +' ' + 'glared at' + ' ' + russian.username(coolguy) + ' ' + ' for trying to get their air jordans messy!</b>');
 			russian[room.id].revolver = spin;
 	        var r = russian[room.id].round;
 			var c = r.length;
 		    if (r.length == c) russian.nextRound(room.id);
-		return this.sendReply('he was lucky wasnt he?');
+		return 
+}, 5000);
 
 			}
 	}
@@ -1134,8 +1420,8 @@ if (canshoot) {
 return this.sendReply(' due to settings, spin atleast once first! type /spin');		  
 			 }}
 	if (room.decision) return this.sendReply('Prof. Oak: There is a time and place for everything! You cannot do this in battle rooms.');
-		if (russian[room.id] == undefined) return this.sendReply('There is no active russiannament in this room.');
-		if (russian[room.id].status < 2) return this.sendReply('There is no russiannament out of its sign up phase.');
+		if (russian[room.id] == undefined) return this.sendReply('There is no active russian roulette in this room.');
+		if (russian[room.id].status < 2) return this.sendReply('There is no russian roulette out of its sign up phase.');
 
           //VVV check if eh cool guy is the guyVV
 		if (!target || target == user){
@@ -1145,6 +1431,8 @@ return this.sendReply(' due to settings, spin atleast once first! type /spin');
               if (spin[0] == "bullet")
 			  { var died = user.userid;
 			  	var error = russian.lose(died, room.id);
+				if (!firstdied){
+		firstdied = true;   firstloser = died;}
 			room.addRaw('<b>' + russian.username(died) + ' ' + 'pulled the trigger and blew spaghetti all over the place! eh, was pretty cool guy too...</b>');
 			if (config.russianstandard == true) {russian.shuffle(spin);}
 			russian[room.id].revolver = spin;
@@ -1187,7 +1475,7 @@ return this.sendReply(' due to settings, spin atleast once first! type /spin');
 		}
 		var error = russian.check(dqGuy, room.id);
 		if (error == -1) {
-			return this.sendReply('The user \'' + target + '\' was not in the russiannament.');
+			return this.sendReply('The user \'' + target + '\' was not in the russian roulette.');
 		}
 		// ^^check if target is in da game^^^
         // VV check if homie already 'cheated'VV
@@ -1200,18 +1488,26 @@ return this.sendReply(' due to settings, spin atleast once first! type /spin');
 		   if (spin[0] == "bullet")
 		{var winned = russian.win(coolguy, room.id);
 		var error = russian.lose(dqGuy, room.id);
+		if (!firstdied){
+		firstdied = true;   firstloser = dqGuy;}
 
 
 
 		
-	room.addRaw('<b>' + russian.username(coolguy) + ' ' + ' !!!cheated!!! and pointed the gun at ' +' '+ russian.username(dqGuy) + ' ' + 'and spilled tomato sauce all over' +' '+ russian.username(dqGuy)+'s '+' ' + ' new shirt! spaghetti flew all over the place! eh, was pretty cool guy too...</b>');
-				if (config.russianstandard == true) {russian.shuffle(spin);}
+	room.addRaw('<b>' + russian.username(coolguy) + ' ' + ' !!!cheated!!! and pointed the gun at ' +' '+ russian.username(dqGuy) + '!!! </b>');
+setTimeout(function() {	
+						room.addRaw('<b>!!BANG!!it spilled tomato sauce all over' +' '+ russian.username(dqGuy) + 's '+' ' + ' new shirt! spaghetti flew all over the place! eh, was pretty cool guy too...</b>');
+
+
+
+		if (config.russianstandard == true) {russian.shuffle(spin);}
 					russian[room.id].revolver = spin;
 			var r = russian[room.id].round;
 			var c = r.length;
 			if (r.length == c) russian.nextRound(room.id);
 			user.canttarget = true;
-			return this.sendReply('you made' + '' + russian.username(dqGuy) + '' + 'get tomato sauce all over his shirt! shame on you!:O');
+			return 
+}, 5000);
 
 			}
 	else {
@@ -1219,15 +1515,20 @@ return this.sendReply(' due to settings, spin atleast once first! type /spin');
 
 
 
-			room.addRaw('<b>' + russian.username(coolguy) + ' ' + ' !!!cheated!!! and pointed the gun at ' +' '+ russian.username(dqGuy)+' ' + ' and pulled the trigger and nothing happened! oh well, maybe next time!' + russian.username(dqGuy) +' ' + 'glared at' + russian.username(coolguy) + ' ' + ' for trying to get their jordans messy!</b>');
-					    if (config.russianstandard == true){
+			room.addRaw('<b>' + russian.username(coolguy) + ' ' + ' !!!cheated!!! and pointed the gun at ' +' '+ russian.username(dqGuy)+'!</b>');
+setTimeout(function() {	
+			
+          room.addRaw('<b>  !!!CLICK!!! nothing happened! oh well, maybe next time!' + russian.username(dqGuy) +' ' + 'glared at' + ' ' + russian.username(coolguy) + ' ' + ' for trying to get their air jordans messy!</b>');
+
+		    if (config.russianstandard == true){
 			poe = spin.shift(); spin.push(poe);}
 			russian[room.id].revolver = spin;
 	        var r = russian[room.id].round;
 			var c = r.length;
 		    if (r.length == c) russian.nextRound(room.id);
 			user.canttarget = true;
-		return this.sendReply('better not try that again!');
+		return 
+}, 5000);
 
 			} 	
 
@@ -1291,20 +1592,16 @@ if (config.russianmultispin == true){
 		this.sendReply('|raw|' + html + "<hr />");
 	},
 
-	
-
-
-
 	russiansettings: function(target, room, user) {
 		if (!russian.maxauth(user)) return this.sendReply('You do not have enough authority to use this command.');
 		if (target === 'replace on') return config.russianunlimitreplace = true;
 		if (target === 'replace off') return config.russianunlimitreplace = false;
 		if (target === 'alts on') return config.russianallowalts = true;
 		if (target === 'alts off') return config.russianallowalts = false;
-		if (target === 'dq on') return config.russiandqguard = false;
+	//	if (target === 'dq on') return config.russiandqguard = false;
 		if (target === 'dq off') return config.russiandqguard = true;
 		if (target === 'multispin') { config.russianstandard = false; config.russianmultispin = true; config.russianspin = false; return;} //multiple spins COMPLETE
-		if (target === '1917')  return config.russian1917 = true;
+		if (target === '1917 on')  return config.russian1917 = true;
         if (target === '1917 off') return config.russian1917 = false;		//1 empty chamber rest bulleetz
 		if (target === 'special')  { config.russianspecial = true; config.russiansmith = false; config.russiannagant = false; config.russianwebley = false;  config.russianlemat = false; return;}            //charter .38 special snubnose undercover
 		if (target === 'smith') { config.russiansmith = true; config.russianspecial = false; config.russiannagant = false; config.russianwebley = false; config.russianlemat = false; return;} //Smith & Wesson model 3- 6 shot
@@ -1313,6 +1610,8 @@ if (config.russianmultispin == true){
 		if (target === 'lemat') {config.russianlemat = true; config.russianspecial = false; config.russiansmith = false; config.russiannagant = false;  config.russianwebley = false; return;}//LeMat Pinfire Revolver 9 shot,1 shotgun 
 		if (target === 'standard') { config.russianstandard = true; config.russianmultispin = false; config.russianspin = false; return;} //only spin once until someone dieded
 		if (target === 'onespin')  { config.russianstandard = false; config.russianmultispin = false; config.russianspin = true; return;} // only spin once per turn automatically COMPLETE
+		if (target === 'gamble on') { return config.russiangamble = true;}
+		if (target === 'gamble off') { return config.russiangamble = false; }
 		// if (target === 'bullets') { 1234};
 		if ((target.substr(0,6) === 'margin') && !isNaN(parseInt(target.substr(7))) && parseInt(target.substr(7)) >= 0) return config.russiantimemargin = parseInt(target.substr(7));
 		if ((target.substr(0,6) === 'period') && !isNaN(parseInt(target.substr(7))) && parseInt(target.substr(7)) > 0) return config.russiantimeperiod = parseInt(target.substr(7));
@@ -1322,24 +1621,30 @@ if (config.russianmultispin == true){
 		if (target === 'view' || target === 'show' || target === 'display') {
 			var msg = '';
 			msg = msg + 'Can players be replaced after the first round? ' + new Boolean(config.russianunlimitreplace) + '.<br>';
-			msg = msg + 'Are alts allowed to join to the same russiannament? ' + new Boolean(config.russianallowalts) + '.<br>';
-			msg = msg + 'Which minimal rank is required in order to use basic level russiannament commands? ' + (!config.russianlowauth ? '+' : (config.russianlowauth === ' ' ? 'None' : config.russianlowauth)) + '.<br>';
-			msg = msg + 'Which minimal rank is required in order to use middle level russiannament commands? ' + (!config.russianmidauth ? '+' : (config.russianmidauth === ' ' ? 'None, which is not recommended' : config.russianmidauth)) + '.<br>';
-			msg = msg + 'Which minimal rank is required in order to use high level russiannament commands? ' + (!config.russianhighauth ? '@' : (config.russianhighauth === ' ' ? 'None, which is highly not recommended' : config.russianhighauth)) + '.<br>';
-			msg = msg + 'In russiannaments with timed register phase, the players joined are logged individually until ' + (isNaN(config.russiantimemargin) ? 3 : config.russiantimemargin) + ' players have joined.<br>';
-			msg = msg + 'In russiannaments with timed register phase, the players joined are logged in groups of ' + (isNaN(config.russiantimemargin) ? 4 : config.russiantimeperiod) + ' players.';
+			msg = msg + 'Are alts allowed to join to the same russian roulette? ' + new Boolean(config.russianallowalts) + '.<br>';
+			msg = msg + 'Which minimal rank is required in order to use basic level russian roulette commands? ' + (!config.russianlowauth ? '+' : (config.russianlowauth === ' ' ? 'None' : config.russianlowauth)) + '.<br>';
+			msg = msg + 'Which minimal rank is required in order to use middle level russian roulette commands? ' + (!config.russianmidauth ? '+' : (config.russianmidauth === ' ' ? 'None, which is not recommended' : config.russianmidauth)) + '.<br>';
+			msg = msg + 'Which minimal rank is required in order to use high level russian roulette commands? ' + (!config.russianhighauth ? '@' : (config.russianhighauth === ' ' ? 'None, which is highly not recommended' : config.russianhighauth)) + '.<br>';
+			msg = msg + 'In russian roulettte with timed register phase, the players joined are logged individually until ' + (isNaN(config.russiantimemargin) ? 3 : config.russiantimemargin) + ' players have joined.<br>';
+			msg = msg + 'In russian roulette with timed register phase, the players joined are logged in groups of ' + (isNaN(config.russiantimemargin) ? 4 : config.russiantimeperiod) + ' players.';
 			return this.sendReplyBox(msg);
 		}
-		return this.sendReply('Valid targets are: view, replace on/off, alts on/off, invalidate on/off, dq on/off, highauth/midauth/lowauth SYMBOL, margin NUMBER, period NUMBER');
+		return this.sendReply('Valid targets are: view, replace on/off, alts on/off, invalidate on/off, highauth/midauth/lowauth SYMBOL, margin NUMBER, period NUMBER, 1917 on/off (hardcore mode), multispin (users can spin the cylinder a few times), onespin (auto spin once every turn warning- long  game), standard(only spins when a bullet is put in the cylinder) ,special( 5 shot),smith (6 shot),nagant ( 7 shot),webley (8 shot),lemat (9 shot)');
 	},
 
 	russiandoc: function() {
 		if (!this.canBroadcast()) return;
-		this.sendReplyBox("Click <a href='http://elloworld.dyndns.org/documentation.html'>here</a> to be taken to the documentation for the russiannament commands.");
+		this.sendReplyBox("Click <a href='http://yolodfjisfs.org/documentation.html'>here</a> to be taken to the documentation for the russian roulette commands.");
 	},
+	
+	russiancredits: function(target, room, user, connection) {
+	
+	if (!this.canbroadcast())  return;
+	this.sendReply("Russian Roulette- created by TYPHOID");
+	this.sendReply("with bugtesting/betatesting and other help from- dyb,handofcaesar, unovachampionn, figufigyu, bandi, calvinz, pikapig123,sooperpooper");
+},	
 
-	survey: 'poll',
-	poll: function(target, room, user) {
+	rpoll: function(target, room, user) {
 		if (!russian.lowauth(user,room)) return this.sendReply('You do not have enough authority to use this command.');
 		if (russian[room.id].question) return this.sendReply('There is currently a poll going on already.');
 		var separacion = "&nbsp;&nbsp;";
@@ -1353,24 +1658,66 @@ if (config.russianmultispin == true){
 		russian[room.id].usergroup = config.groupsranking.indexOf(user.group);
 		room.addRaw('<div class="infobox"><h2>' + russian[room.id].question + separacion + '<font size=2 color = "#939393"><small>/vote OPTION<br /><i><font size=1>Poll started by '+user.name+'</font size></i></small></font></h2><hr />' + separacion + separacion + " &bull; " + russian[room.id].answerList.join(' &bull; ') + '</div>');
 	},
-
-	vote: function(target, room, user) {
+paygamble: function(target, room, user) {
+        russian.testcoins();
+							 
+							 }
+							 ,
+	gamble: function(target, room, user) {
+	hipe = user;
+	take = true;
+			var targets = russian.splint(target);
+				var targetUser = Users.get(targets[0]);
+		if (!targetUser) {
+			var targetUser = sanitize(targets[0].toLowerCase());
+		} else {
+			var targetUser = toId(targets[0]);
+		} console.log(targets)
+		if (!targets[1]) { return this.sendReply(' you did not specify an amount. proper syntax is /gamble USERNAME, AMOUNT bits or /gamble USERNAME, amount bunnies');}
+				if (targets[1].split('bunn').length - 1 > 0){
+		targets[1] = parseInt(targets[1]);
+		if (isNaN(targets[1]) || !targets[1]) return this.sendReply('proper syntax is /gamble USERNAME, AMOUNT bits or /gamble USERNAME, amount bunnies');
+        targets[1] = Math.ceil(targets[1]);
+		      targets[2] = 'bunnies';       }
+			  	else if (targets[1].split('bit').length - 1 > 0){
+		targets[1] = parseInt(targets[1]);
+		if (isNaN(targets[1]) || !targets[1]) return this.sendReply('proper syntax is /gamble USERNAME, AMOUNT bits or /gamble USERNAME, amount bunnies');
+        targets[1] = Math.ceil(targets[1]);
+		      targets[2] = 'bits';       }
+			  else return this.sendReply('you did not specify wether you are betting bunnies or bits!Proper syntax for this commandd: /gamble USERNAME, NUMBER bunnies or /gamble USERNAME, NUMBER bits');
+		if (!targets[1]) return this.sendReply('');
 		var ips = JSON.stringify(user.ips);
-		if (!russian[room.id].question) return this.sendReply('There is no poll currently going on in this room.');
-		if (!target) return this.parse('/help vote');
-		if (russian[room.id].answerList.indexOf(target.toLowerCase()) == -1) return this.sendReply('\'' + target + '\' is not an option for the current poll.');
-		russian[room.id].answers[ips] = target.toLowerCase();
-		return this.sendReply('You are now voting for ' + target + '.');
+		if (!russian[room.id].question) return this.sendReply('There is nothing to bet on currently  in this room.');
+		if (!target) return this.parse('/help gamble');
+		if (russian[room.id].answerList.indexOf(targets[0].toLowerCase()) == -1) return this.sendReply('\'' + target + '\' is not an option for the current wager.');
+	
+				if (russian[room.id].answers[ips]) {
+					return this.sendReply(' youve already placed a bet for this wager. wait for the next one!id let you change your vote, but im too lazy to code that!');
+				}
+			russianfunny = targets[1];
+			if (targets[2] == 'bits'){var gamblable = russian.gamblebits(hipe, room, russianfunny, take)}
+			if (targets[2] == 'bunnies'){var gamblable = russian.gamblecoins(hipe, room, russianfunny, take)}
+			if (gamblable == true){
+		russian[room.id].answers[ips] = targets[0].toLowerCase();
+		if (voteloser == true){
+		russian[room.id].gambleloser.push([targetUser, user, targets[1],targets[2]])
+		return this.sendReply('You are now betting ' + targets[1] + ' '+ targets[2]+' '+ 'on ' + targets[0] + ' to lose first.');
+	       }
+		   if (votewinner == true) {
+		   		russian[room.id].gamblewinner.push([targetUser, user, targets[1],targets[2]])
+		return this.sendReply('You are now betting ' + targets[1] + ' '+ targets[2]+' '+ 'on ' + targets[0] + ' to win it big!');
+
+		   } 
+		   } else return this.sendReply(' you do not have enough money to bet that amount! check your balance with /atm!')
 	},
 
-	votes: function(target, room, user) {
+	gambles: function(target, room, user) {
 		if (!this.canBroadcast()) return;
 		this.sendReply('NUMBER OF VOTES: ' + Object.keys(russian[room.id].answers).length);
 	},
 
-	endsurvey: 'endpoll',
-	ep: 'endpoll',
-	endpoll: function(target, room, user) {
+
+	endrpoll: function(target, room, user) {
 		if (!russian.lowauth(user,room)) return this.sendReply('You do not have enough authority to use this command.');
 		if (!russian[room.id].question) return this.sendReply('There is no poll to end in this room.');
 		if (russian[room.id].usergroup > config.groupsranking.indexOf(user.group)) return this.sendReply('You cannot end this poll as it was started by a user of higher auth than you.');
@@ -1400,8 +1747,8 @@ if (config.russianmultispin == true){
 		russian[room.id].answers = new Object();
 	},
 
-	pollremind: 'pr',
-	pr: function(target, room, user) {
+	russianremind: 'rr',
+	rr: function(target, room, user) {
 		var separacion = "&nbsp;&nbsp;";
 		if (!russian[room.id].question) return this.sendReply('There is currently no poll going on.');
 		if (!this.canBroadcast()) return;
@@ -1410,4 +1757,7 @@ if (config.russianmultispin == true){
 };
 
 for (var i in cmds) CommandParser.commands[i] = cmds[i];
+/*********************************************************
+ * Events
+ *********************************************************/
 
